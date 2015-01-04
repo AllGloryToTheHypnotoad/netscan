@@ -5,6 +5,7 @@ import subprocess
 from awake import wol
 
 import time
+#import make_html5
  
 import json
 import yaml
@@ -19,6 +20,8 @@ from sys import platform as _platform
 import re
 import uuid
 import socket
+
+import YamlDoc as yd
 
 # sudo fing --silent -s 192.168.1.2 -o json
 #  fping -a -q  -s -g 192.168.1.0/24
@@ -59,7 +62,9 @@ class IP:
 	out: returns the host machine's IP address
 	"""
 	def getHostIP(self):
-		ip = socket.gethostbyname(socket.gethostname())
+		host_name = socket.gethostname()
+		if '.local' not in host_name: host_name = host_name + '.local'
+		ip = socket.gethostbyname(host_name)
 		return ip
 
 	"""
@@ -82,27 +87,6 @@ class IP:
 
 this_host = IP()
 
-import yaml
-"""
-Simple class to read/write yaml docs to dict's
-"""
-class YamlDoc:	
-	def read(self,filename):
-		# need better testing, breaks if file missing
-		try:
-			f = open(filename,'r')
-			file = yaml.safe_load(f)
-			f.close()
-		except IOError:
-			file = dict()
-			print 'ioerror'
-		return file
-		
-	def write(self,filename,data):
-		f = open(filename,'w')
-		yaml.safe_dump(data,f)
-		f.close()
-		
 # """
 # Simple function to eat duplicate white space
 # 'hi  how    are you' -> 'hi how are you'
@@ -122,6 +106,8 @@ setup looks like this:
   lastseen: 20141130-21:01
   status: up
   tcp: {'22': ssh, '548': afp, '88': kerberos-sec}
+
+Could switch to a real database, but my network is small and a flat file works fine.
 """
 
 class Database :
@@ -129,13 +115,13 @@ class Database :
 		self.db = dict()
 	
 	def load(self,filename):
-		y = YamlDoc()
+		y = yd.YamlDoc()
 		self.db = y.read(filename)
 		if (self.db) != dict:
 			self.db = dict()
 		
 	def save(self,filename):
-		y = YamlDoc()
+		y = yd.YamlDoc()
 		y.write( filename, self.db )
 	
 	"""
@@ -158,6 +144,10 @@ class Database :
 		for k in self.db:
 			ans.append(k)
 		return ans
+		
+	def getDict(self):
+		out = self.db
+		return out
 
 """
 Simple python wrapper around nmap and fping to scan and collect info on
@@ -197,10 +187,9 @@ class NetworkScan:
 	out: list of hosts ip's
 	"""
 	def ping(self, ip):
-		print 'ping()'
+		#print 'ping()'
 		#cmd = ['fping -a -g %s'%(ip)]
 		cmd = ["sudo nmap -sn -PS22,80,443,3389,5000 -oG - %s | grep Up | awk '{print $2}'"%(ip)]
-		#out = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()[0]
 		out = self.runProcess(cmd)
 		hosts = out.split('\n')
 		
@@ -209,7 +198,7 @@ class NetworkScan:
 		return hosts
 	"""
 	Use the avahi (zeroconfig) tools to find a host name ... this only works
-	on Linux.
+	on Linux using the avahi tools.
 	
 	in: ip
 	out: string w/ host name
@@ -217,11 +206,10 @@ class NetworkScan:
 	def getHostName(self,ip):
 		name = 'unknown'
 		if _platform == 'linux' or _platform == 'linux2':
-			args = "%s"%(ip)
-			cmd = ["avahi-resolve-address",args]
-			#out = subprocess.Popen(["avahi-resolve-address",args], stdout = subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()[0]
-			out = self.runProcess(cmd)
-			name = out.split(' ')[1]
+			cmd = ["avahi-resolve-address %s | awk '{print $2}'"%(ip)]
+			name  = self.runProcess(cmd)
+			name = name.rstrip()
+			if name == '': name = 'unknown'
 		return name
 	
 	"""
@@ -238,7 +226,6 @@ class NetworkScan:
 		# result is pipped to sed to remove extra whitespace
 		cmd = ["nmap -sS -oN - %s  | grep 'tcp\|MAC' | sed 's/^ *//;s/ *$//;s/ \{1,\}/ /g' "%(ip)]
 		#print 'cmd: ',cmd
-		#out = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()[0]
 		out = self.runProcess(cmd)
 		
 		#print out
@@ -281,7 +268,7 @@ class NetworkScan:
 		time_now = str(datetime.datetime.now().strftime('%Y%m%d-%H:%M'))
 		for ip in up:
 			if ip == '': continue
-			print '[+] scanning ip:',ip
+			#print '[+] scanning ip:',ip
 			p,hw_addr,type = self.portScan(ip)
 			
 			# since we finger print on hw_addr, if we don't have it move on
@@ -315,6 +302,13 @@ out: None
 def notify(items):
 	return 0	
 
+def make_webpage(info):
+	table = makeTable(info)
+	page = WebPage()
+	page.create(table,'LAN Host Map')
+	page.savePage('test.html')
+	
+
 def main():
 	
 	db = Database()
@@ -330,7 +324,7 @@ def main():
 		
 		#print 'start scan'
 		list = scan.scanNetwork('192.168.1.0/24')
-		pp.pprint(list)
+		#pp.pprint(list)
 		
 		#ans,new_items = db.diff(list)
 		db.update(list)
@@ -339,6 +333,8 @@ def main():
 		#	notify(new_items)
 		
 		db.save('network.yaml')
+		
+		make_webpage( dg.getDict() )
 		
 		time.sleep(1)
 

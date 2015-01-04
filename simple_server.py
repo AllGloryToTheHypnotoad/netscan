@@ -4,8 +4,11 @@
 
 import time
 import BaseHTTPServer
+import socket
 
-HOST_NAME = 'localhost' # !!!REMEMBER TO CHANGE THIS!!!
+host_name = socket.gethostname()
+if '.local' not in host_name: host_name = host_name + '.local'
+HOST_NAME = socket.gethostbyname(host_name) 
 PORT_NUMBER = 9000 # Maybe set this to 9000.
 
 
@@ -59,9 +62,9 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 			
 		except IOError:
 			self.send_error(404,'Python File Not Found: %s' % self.path)
-		except KeyboardInterrupt:
-			print '^C received, shutting down the web server'
-			server.socket.close()
+#		except KeyboardInterrupt:
+#			print '^C received, shutting down the web server'
+#			server.socket.close()
 	
 
 if __name__ == '__main__':
@@ -70,7 +73,11 @@ if __name__ == '__main__':
     print time.asctime(), "Server Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
     try:
         httpd.serve_forever()
+#    except KeyboardInterrupt:
+#        pass
     except KeyboardInterrupt:
-        pass
+        print 'Recieved ^C ... exiting'
+    except:
+	print 'Error ... exiting'
     httpd.server_close()
     print time.asctime(), "Server Stops - %s:%s" % (HOST_NAME, PORT_NUMBER)

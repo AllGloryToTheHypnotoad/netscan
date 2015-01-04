@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from netscan import YamlDoc
+import YamlDoc as yd
 
 class WebPage:
 	def __init__(self):
@@ -32,7 +32,12 @@ class WebPage:
 		
 		self.page = page
 	
-	
+	def savePage(self,filename):
+		f = open(filename,'w')
+		for i in self.page:
+			f.write(i)
+		f.close()
+		
 	# Expect a list containing lines of html which will create a Google Map	
 	def printPage(self):
 		for i in self.page:
@@ -80,12 +85,12 @@ def makeTable(info):
 	return ans
 	
 def main():
-	y = YamlDoc()
+	y = yd.YamlDoc()
 	info = y.read('network.yaml')
 	table = makeTable(info)
 	page = WebPage()
 	page.create(table,'LAN Host Map')
-	page.printPage()
+	page.savePage('test.html')
 	
 
 if __name__ == "__main__":
