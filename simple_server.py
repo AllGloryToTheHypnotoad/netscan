@@ -9,7 +9,7 @@ import socket
 host_name = socket.gethostname()
 if '.local' not in host_name: host_name = host_name + '.local'
 HOST_NAME = socket.gethostbyname(host_name) 
-PORT_NUMBER = 9000 # Maybe set this to 9000.
+PORT_NUMBER = 8080 # non-root web server
 
 
 class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
