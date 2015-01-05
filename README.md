@@ -1,13 +1,14 @@
 # Network Scanner
 
-![diagram](./pics/LAN Scanner 3.png)
+![diagram](./pics/LAN-Scanner-3.png)
 
 Simple python script which uses [nmap](http://) and [avahi](http://www.avahi.org) to:
 
 1. Find hosts that are on the LAN, uses WOL
 2. Scan each host to determine: open ports, OS info, MAC address
-3. Notify admin of new hosts on network
+3. [todo] Notify admin of new hosts on network
 4. Store record of hosts in YAML file
+5. Creates a webpage for the server to display
 
 ## Usage
 
@@ -15,7 +16,7 @@ Scanner:
 
 	sudo netscan
 
-Web server (http://localhost:9000):
+Web server (http://localhost:8080):
 
 	simple_server
 
@@ -30,8 +31,6 @@ Install:
 
 Nmap needs to be run as root, using sudo, to do it's job properly.
 
-	???
-
 Nmap network scan:
 
 	sudo nmap -sn -PS22,80,443,3389,5000 -oG - %s 
@@ -44,8 +43,10 @@ Nmap host scan:
 
 	nmap -sS -oN - _host-IP_
 
-* `sS` is ...
+* `sS` is a TCP SYN to check for open ports
 * `oN` is normal output
+
+A full listing of known ports are available on [wikipedia](http://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers)
 
 **Note:** Both `nmap` commands get pipped through grep, awk, and/or sed to clean the output up for python.
 
@@ -63,7 +64,7 @@ Currently this is just a simple python dictionary which gets stored on the hard 
 
 ## Notification
 
-Admin notification is via [Twilio](http://)
+Admin notification is via [Twilio](https://www.twilio.com/sms). You can get a free account and text phone numbers you own for free.
 
 ## Environment
 
