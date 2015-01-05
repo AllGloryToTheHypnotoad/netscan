@@ -5,7 +5,7 @@ import subprocess
 from awake import wol
 
 import time
-#import make_html5
+import make_html5 as mh
  
 import json
 import yaml
@@ -86,6 +86,10 @@ class IP:
 # 		return ip
 
 this_host = IP()
+HTML_FILE = '/var/tmp/test.html'
+YAML_FILE = '/var/tmp/network.yaml'
+NETWORK = '192.168.1.0/24'
+
 
 # """
 # Simple function to eat duplicate white space
@@ -303,16 +307,15 @@ def notify(items):
 	return 0	
 
 def make_webpage(info):
-	table = makeTable(info)
-	page = WebPage()
+	table = mh.makeTable(info)
+	page = mh.WebPage()
 	page.create(table,'LAN Host Map')
-	page.savePage('test.html')
-	
+	page.savePage(HTML_FILE)
 
 def main():
 	
 	db = Database()
-	db.load('network.yaml')
+	db.load(YAML_FILE)
 	
 	scan = NetworkScan()
 	
@@ -323,7 +326,7 @@ def main():
 			scan.wol(mac)
 		
 		#print 'start scan'
-		list = scan.scanNetwork('192.168.1.0/24')
+		list = scan.scanNetwork(NETWORK)
 		#pp.pprint(list)
 		
 		#ans,new_items = db.diff(list)
@@ -332,7 +335,7 @@ def main():
 		#if ans == true:
 		#	notify(new_items)
 		
-		db.save('network.yaml')
+		db.save(YAML_FILE)
 		
 		make_webpage( dg.getDict() )
 		

@@ -22,7 +22,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 			print "requested path: " + self.path
 			
 			if self.path=="/":
-				self.path="./test.html"
+				self.path="/var/tmp/test.html"
 			
 			sendReply = True
 			if self.path.endswith(".html"):
