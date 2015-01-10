@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# take a look at this:  https://pypi.python.org/pypi/python-libnmap/0.6.1
+
+
 import subprocess
 #import nmap << junk
 from awake import wol
