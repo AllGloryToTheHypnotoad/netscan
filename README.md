@@ -1,6 +1,6 @@
 # Network Scanner
 
-![diagram](./pics/LAN-Scanner-3.png)
+![diagram](./pics/LAN-Scanner-3.jpg)
 
 Simple python script which uses [nmap](http://) and [avahi](http://www.avahi.org) to:
 
