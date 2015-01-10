@@ -121,6 +121,12 @@ def makeTable(info):
 	table.append('<tr> <th> Host Name </th> <th> IPv4 </th> <th> MAC addr </th> <th> Type </th> <th> Status </th> <th> Ports </th> </tr>')
 	table.append('<p> <i class="fa fa-check-circle" style="color:green"></i> Host Up </p>')
 	table.append('<p> <i class="fa fa-times-circle" style="color:red"></i> Host Down </p>')
+	
+	time_now = str(datetime.datetime.now().strftime('%Y%m%d-%H:%M'))
+	table.append('<p> Info last updated: %s </p>'%time_now)
+	
+	table.append('<p> A list of common TCP ports is <a href="http://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers"> here </a></p>')
+	
 	for k,v in info.iteritems():
 		table.append('<tr>')
 		table.append( '<td>' + v['hostname'] + '</td>' )
