@@ -2,3 +2,5 @@
 old
 *.html
 *.yaml
+.DS_Store
+.AppleDouble
