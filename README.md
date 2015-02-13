@@ -10,15 +10,25 @@ Simple python script which uses [nmap](http://) and [avahi](http://www.avahi.org
 4. Store record of hosts in YAML file
 5. Creates a webpage for the server to display
 
-## Usage
+## Install and Usage
 
-Scanner:
+### Install from Git
 
-	sudo netscan
+	sudo pip install git+https://github.com/walchko/netscan#egg=netscan
 
-Web server (http://localhost:8080):
+### Install from Package
 
-	simple_server
+Download and unzip, then from inside the package:
+
+	sudo python setup.py install
+
+If you are working on it:
+
+	sudo python setup.py develop
+
+### Run
+
+	sudo python -m netscan.netscan2
 
 ## UNIX Tools
 
@@ -27,7 +37,7 @@ Install:
 	OSX: brew install nmap
 	Linux: sudo apt-get install nmap
 
-	sudo pip install twilio wol PyYAML
+	sudo pip install twilio wol PyYAML python-nmap
 
 Nmap needs to be run as root, using sudo, to do it's job properly.
 

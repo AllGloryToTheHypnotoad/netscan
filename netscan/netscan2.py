@@ -6,8 +6,9 @@ import time
 import make_html5 as mh
 from YamlDoc import YamlDoc
 import datetime
-import pprint as pp
+#import pprint as pp
 import NetworkScan as ns
+import argparse
 
 def makeTable(info):
 	table = ['<h1> LAN Host Map </h1>']
@@ -59,11 +60,6 @@ def makeTable(info):
 
 
 ##################################################################
-
-
-HTML_FILE = './test.html'
-YAML_FILE = '/var/tmp/network.yaml'
-NETWORK = '192.168.1.0/24'
 
 
 # """
@@ -137,13 +133,29 @@ out: None
 def notify(items):
 	return 0	
 
-def make_webpage(info):
+def make_webpage(info,HTML_FILE):
 	table = makeTable(info)
 	page = mh.WebPage()
 	page.create(table,'LAN Host Map')
 	page.savePage(HTML_FILE)
 
+def handleArgs():
+	parser = argparse.ArgumentParser('A simple network recon program')
+	parser.add_argument('-p', '--page', help='name of webpage', default='./network.html')
+	parser.add_argument('-n', '--network', help='network to scan: 10.1.1.0/24 or 10.1.1.1-10', default='192.168.1.0/24')
+	parser.add_argument('-y', '--yaml', help='yaml file to store network in', default='./network.yaml')
+	parser.add_argument('-s', '--sleep', help='how long to sleep between scans', default=3600)
+	
+	args = vars(parser.parse_args())
+	
+	return args
+
 def main():
+	args = handleArgs()
+	YAML_FILE = str(args['yaml'])
+	NETWORK = str(args['network'])
+	SLEEP = int(args['sleep'])
+	WEBPAGE = args['page']
 	
 	db = Database()
 	db.load(YAML_FILE)
@@ -156,9 +168,9 @@ def main():
 		for mac in hw_addr:
 			scan.wol(mac)
 		
-		print 'start scan'
+		print '*'*10,'Start scan on',NETWORK,'*'*10
 		list = scan.scanNetwork(NETWORK)
-		pp.pprint(list)
+		#pp.pprint(list)
 		
 		#ans,new_items = db.diff(list)
 		db.update(list)
@@ -166,12 +178,13 @@ def main():
 		#if ans == true:
 		#	notify(new_items)
 		
-		print 'save: ',YAML_FILE
+		print '>> Save:',YAML_FILE,'<<'
 		db.save(YAML_FILE)
 		
-		make_webpage( db.getDict() )
+		print '>> Write:',WEBPAGE,'<<'
+		make_webpage( db.getDict(), WEBPAGE )
 		
-		time.sleep(3600)
+		time.sleep(SLEEP)
 
 if __name__ == '__main__':
     main()
