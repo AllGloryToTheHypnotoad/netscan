@@ -5,6 +5,7 @@ from libnmap.parser import NmapParser
 import pprint as pp
 import datetime
 from awake import wol
+import subprocess
 
 # determine OS
 from sys import platform as _platform
@@ -104,7 +105,8 @@ class NetworkScan:
 		name = 'unknown'
 		if _platform == 'linux' or _platform == 'linux2':
 			cmd = ["avahi-resolve-address %s | awk '{print $2}'"%(ip)]
-			name  = self.runProcess(cmd)
+			#name  = self.runProcess(cmd)
+			name = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()[0]
 			name = name.rstrip()
 			if name == '': name = 'unknown'
 		return name
