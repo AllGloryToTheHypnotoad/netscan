@@ -14,7 +14,7 @@ Simple python script which uses [nmap](http://nmap.org) and [avahi](http://www.a
 4. Store record of hosts in YAML file
 5. Creates a webpage for the server to display
 
-**Note:** Since IP addresses change, the hosts are finger printed via their MAC address. The system updates open port, host name, ip address, etc, but once a MAC address is detected, it never deletes it, just updates it.
+**Note:** Since IP addresses change, the hosts are finger printed via their MAC address. The system updates open port, host name, ip address, etc, but once a MAC address is detected, it never deletes it, just updates it. However, their commandline tool for RPi I have noticed errors in the MAC address and therefor don't trust it for this application.
 
 ## Alternatives
 
@@ -39,6 +39,52 @@ If you are working on it:
 ### Run
 
 	sudo python -m netscan.netscan2
+
+### Init.d
+
+Here is the script I put in `/etc/init.d/netscan` to have it run as `root` automatically.
+
+	# /etc/init.d/netscan
+	#
+
+	# Some things that run always
+	DAEMON_USER=root
+	DIR=/home/pi/github/netscan
+	DAEMON_NAME=netscan
+	DAEMON=$DAEMON_NAME
+	DAEMON_full="/usr/bin/python -- -m netscan.netscan2 -y /mnt/usbdrive/network.yaml --network '192.168.1.0/24' -p 
+	/mnt/usbdrive/network.html "
+	PIDFILE=/var/run/$DAEMON_NAME.pid
+
+	. /lib/lsb/init-functions
+
+	# Carry out specific functions when asked to by the system
+	case "$1" in
+	  start)
+		echo "Starting netscan"
+		log_daemon_msg "Starting system $DAEMON_NAME daemon"
+		start-stop-daemon --start --background --pidfile $PIDFILE --make-pidfile --user $DAEMON_USER --chuid $DAEMON
+	_USER --startas $DAEMON_full 
+		log_end_msg $?
+		;;
+	  stop)
+		log_daemon_msg "Stopping system $DAEMON_NAME daemon"
+		start-stop-daemon --stop --pidfile $PIDFILE --retry 10
+		log_end_msg $?
+		;;
+	  status)
+		status_of_proc $SERVER_NAME $SERVER && status_of_proc $DAEMON_NAME $DAEMON && exit 0 || exit $?
+		#status_of_proc $SERVER_NAME $SERVER && exit 0 || exit $?    
+		;;
+	  *)
+		echo "Usage: /etc/init.d/netscan {start|status|stop}"
+		exit 1
+		;;
+	esac
+
+	exit 0
+
+Now a quick `sudo /etc/init.d/netscan start` or `sudo /etc/init.d/netscan stop` can get things going or end them easily.
 
 ## Nmap
 
@@ -111,3 +157,45 @@ Admin notification is via [Twilio](https://www.twilio.com/sms). You can get a fr
 
 This program runs on both linux (Raspberry Pi) and OSX.
 
+# Node.js server
+
+I am still working on this and will probably make changes. There are several things I have served up by node.js. Here is my `/etc/init.d/nodejs` script:
+
+	# /etc/init.d/nodesjs
+	#
+
+	# Some things that run always
+	DAEMON_USER=root
+	DIR=/usr/local/bin
+	DAEMON_NAME=http-server
+	DAEMON=$DIR/$DAEMON_NAME
+	PIDFILE=/var/run/$DAEMON_NAME.pid
+	DAEMON_full="$DAEMON -- /mnt/usbdrive -p 9000 -s"
+
+	. /lib/lsb/init-functions
+
+	# Carry out specific functions when asked to by the system
+	case "$1" in
+	  start)
+		echo "Starting Nodejs HTTP Server"
+			echo $DAEMON_full
+		log_daemon_msg "Starting system $DAEMON_NAME daemon"
+		start-stop-daemon --start --background --pidfile $PIDFILE --make-pidfile --user $DAEMON_USER --chuid $DA
+	EMON_USER --startas $DAEMON_full
+			log_end_msg $?
+		;;
+	  stop)
+		log_daemon_msg "Stopping system $DAEMON_NAME daemon"
+		start-stop-daemon --stop --pidfile $PIDFILE --retry 10
+		log_end_msg $?
+		;;
+	  status)
+		status_of_proc status_of_proc $DAEMON_NAME $DAEMON && exit 0 || exit $?
+		;;
+	  *)
+		echo "Usage: /etc/init.d/nodejs-movies {start|status|stop}"
+		exit 1
+		;;
+	esac
+
+	exit 0
