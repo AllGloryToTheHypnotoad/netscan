@@ -1,6 +1,6 @@
 # Network Scanner
 
-![diagram](./pics/netscan.jpg)
+![diagram](./pics/netscan.png)
 
 ![diagram](./pics/LAN-Scanner-3.jpg)
 
