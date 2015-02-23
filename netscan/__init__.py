@@ -1,9 +1,5 @@
-#import .netscan2
-#import .YamlDoc
-#import .NetworkScan
-#import .make_html5
-
-__all__ = ["NetworkScan",
-           "WebPage",
-           "YamlDoc",
-           "IP"]
+# this automatically loads these into name space, better to manually load them
+#__all__ = ["NetworkScan",
+#           "WebPage",
+#           "YamlDoc",
+#           "IP"]

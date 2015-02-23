@@ -2,11 +2,17 @@
 
 
 class WebPage:
+	"""Creates a simple webpage"""
 	def __init__(self):
 		self.page = []
 		
 	# Note: this auto refreshes every 300 seconds.
 	def create(self,html_body,title='Web Page'):
+		"""Creates a simple webpage
+		in: html_body - what you want displayed
+		    title - name of page
+		out: None
+		"""
 		html_start = """
 		<!DOCTYPE html>
 		<html>
@@ -32,6 +38,7 @@ class WebPage:
 		self.page = page
 	
 	def savePage(self,filename):
+		"""Saves page to file"""
 		f = open(filename,'w')
 		for i in self.page:
 			f.write(i)
@@ -39,6 +46,7 @@ class WebPage:
 		
 	# Expect a list containing lines of html which will create a Google Map	
 	def printPage(self):
+		"""Prints page to screen"""
 		for i in self.page:
 			print i
 

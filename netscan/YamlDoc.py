@@ -2,11 +2,13 @@
 #
 
 import yaml
-"""
-Simple class to read/write yaml docs to dict's
-"""
+
 class YamlDoc:	
+	"""
+	Simple class to read/write yaml docs to dict's
+	"""
 	def read(self,filename):
+		"""Reads a Yaml file"""
 		# need better testing, breaks if file missing
 		try:
 			f = open(filename,'r')
@@ -18,6 +20,7 @@ class YamlDoc:
 		return file
 		
 	def write(self,filename,data):
+		"""Writes a Yaml file"""
 		f = open(filename,'w')
 		yaml.safe_dump(data,f)
 		f.close()
