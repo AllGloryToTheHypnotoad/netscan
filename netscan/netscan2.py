@@ -8,12 +8,66 @@ from YamlDoc import YamlDoc
 import datetime
 #import pprint as pp
 import NetworkScan as ns
-import argparse
+import argparse # commandline
+import socket # ordering
+
+# might use these to color code port number (green for good)
+good_tcp_ports = ['22',   # ssh
+				  '88',   # kerberos
+				  '548']  # AFP - Apple File Protocol
+good_udp_ports = ['123',  # ntp - network time protocol
+				  '5353'] # bonjour/zeroconfig
+
+
+def makeRow(k,v):
+	row = []
+	row.append('<tr>')
+	row.append( '<td>' + v['hostname'] + '</td>' )
+	
+	# up or down
+	if v['status'] == 'up':
+		#icon = '<i class="fa fa-chevron-circle-up"></i>'
+		icon = '<i class="fa fa-check-circle" style="color:green"></i>'
+	else:
+		#icon = '<i class="fa fa-chevron-circle-down"></i>'
+		icon = '<i class="fa fa-times-circle" style="color:red"></i>'
+		
+	row.append( '<td>' + icon + '</td>' )
+	row.append( '<td>' + v['ipv4'] + '</td>' )
+	row.append( '<td>' + k + '</td>' )
+	row.append( '<td>' + v['type'] + '</td>' )
+	
+	
+	#row.append( '<td>' + v['status'] + '</td>' )
+	
+	# do a table within a table for all of the ports
+	row.append('<td><table id="porttable">')
+	for a,b in v['ports'].iteritems():
+		row.append( '<tr id="porttd"><td>' + a + '</td><td>' + b + '</td></tr>' )
+	
+	row.append('</table></td>')
+	row.append('</tr>')
+	ans = ''.join(row)
+	return ans
+
+def sort_ip(info):
+	ip = []
+	for k,v in info.items():
+		ip.append( v['ipv4'] )
+	ip_sorted = sorted(ip, key=lambda item: socket.inet_aton(item))
+	return ip_sorted
+
+def search(ip,info):
+	for k,v in info.items():
+		if ip == v['ipv4']:
+			return k,v
+	raise Exception('Error: search() should not have gotten here')
 
 def makeTable(info):
 	table = ['<h1> LAN Host Map </h1>']
 	table.append('<style> table, tr, th { border: 1px solid gray; border-collapse: collapse;} th {background-color: #0066FF; color: white;} #porttable, #porttd { border: 0px;}</style>')
-	table.append('<table style="width:100%">')
+	#table.append('<table style="width:100%">')
+	table.append('<table class="table table-striped">')
 	table.append('<tr> <th> Host Name </th> <th> IPv4 </th> <th> MAC addr </th> <th> Type </th> <th> Status </th> <th> Ports </th> </tr>')
 	table.append('<p> <i class="fa fa-check-circle" style="color:green"></i> Host Up </p>')
 	table.append('<p> <i class="fa fa-times-circle" style="color:red"></i> Host Down </p>')
@@ -23,31 +77,20 @@ def makeTable(info):
 	
 	table.append('<p> A list of common TCP ports is <a href="http://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers"> here </a></p>')
 	
-	for k,v in info.iteritems():
-		table.append('<tr>')
-		table.append( '<td>' + v['hostname'] + '</td>' )
-		table.append( '<td>' + v['ipv4'] + '</td>' )
-		table.append( '<td>' + k + '</td>' )
-		table.append( '<td>' + v['type'] + '</td>' )
-		
-		
-		#table.append( '<td>' + v['status'] + '</td>' )
-		if v['status'] == 'up':
-			#icon = '<i class="fa fa-chevron-circle-up"></i>'
-			icon = '<i class="fa fa-check-circle" style="color:green"></i>'
-		else:
-			#icon = '<i class="fa fa-chevron-circle-down"></i>'
-			icon = '<i class="fa fa-times-circle" style="color:red"></i>'
-			
-		table.append( '<td>' + icon + '</td>' )
-		
-		# do a table within a table for all of the ports
-		table.append('<td><table id="porttable">')
-		for a,b in v['ports'].iteritems():
-			table.append( '<tr id="porttd"><td>' + a + '</td><td>' + b + '</td></tr>' )
-		
-		table.append('</table></td>')
-		table.append('</tr>')
+	# get sorted IP list
+	ip_sorted = sort_ip(info)
+	#print ip_sorted
+	
+	# k - mac address
+	# v - dict of host info
+	#for k,v in info.iteritems():
+	#	table.append( makeRow(k,v) )
+	try:
+		for ip in ip_sorted:
+			k,v = search(ip,info)
+			table.append( makeRow(k,v) )
+	except:
+		print 'Error in sorting IP addresses'		
 		
 	table.append('</table>')
 	
@@ -140,7 +183,7 @@ def make_webpage(info,HTML_FILE):
 	page.savePage(HTML_FILE)
 
 def handleArgs():
-	parser = argparse.ArgumentParser('A simple network recon program')
+	parser = argparse.ArgumentParser('A simple network recon program using nmap which creates a webpage.')
 	parser.add_argument('-p', '--page', help='name of webpage', default='./network.html')
 	parser.add_argument('-n', '--network', help='network to scan: 10.1.1.0/24 or 10.1.1.1-10', default='192.168.1.0/24')
 	parser.add_argument('-y', '--yaml', help='yaml file to store network in', default='./network.yaml')

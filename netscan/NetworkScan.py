@@ -155,7 +155,7 @@ class NetworkScan:
 				if serv.open(): p[ str(serv.port) ] = '[' + serv.protocol + ']' + serv.service
 			
 			val = {'ipv4': ip, 'hostname': 'unknown', 'ports': p, 'status': 'up', 'type': host.vendor}
-			key = host.mac
+			key = host.mac.upper() # make letters upper case
 		
 		return key,val
 	

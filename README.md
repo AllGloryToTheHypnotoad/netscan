@@ -50,7 +50,13 @@ If you are working on it:
 
 ### Run
 
-	sudo python -m netscan.netscan2
+To see all run time options:
+
+	sudo python -m netscan.netscan2 --help
+
+Basic, to search for addresses ending in 25 to 70 on your network, use:
+
+	sudo python -m netscan.netscan2 -n 192.168.10.25-70
 
 ### Init.d
 
@@ -107,7 +113,7 @@ Install:
 	OSX: brew install nmap
 	Linux: sudo apt-get install nmap
 
-	sudo pip install twilio wol PyYAML python-nmap
+	sudo pip install twilio wol PyYAML python-libnmap
 
 Nmap needs to be run as root, using sudo, to do it's job properly.
 
