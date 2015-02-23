@@ -13,12 +13,24 @@ Simple python script which uses [nmap](http://nmap.org) and [avahi](http://www.a
 3. [todo] Notify admin of new hosts on network
 4. Store record of hosts in YAML file
 5. Creates a webpage for the server to display
+6. SMS admin when host appears (maybe ports too)
+7. Make last update date a little more friendly to read
+8. Add next update due 
 
 **Note:** Since IP addresses change, the hosts are finger printed via their MAC address. The system updates open port, host name, ip address, etc, but once a MAC address is detected, it never deletes it, just updates it. However, their commandline tool for RPi I have noticed errors in the MAC address and therefor don't trust it for this application.
 
 ## Alternatives
 
 * [Fing](http://www.overlooksoft.com/fing) is a great and fast network scanner, I have their app on my iPad
+
+## To Do
+
+* Use [Bootstrap](http://getbootstrap.com) `.table-striped` class
+* Move status marker closer to name
+* Order table according to IP Address
+* Already finger print on MAC, but always keep name if avahi comes back with unknown ... same with type
+* Color code known TCP/UDP ports and unknown/odd ports
+* Group TCP and UDP ports together rather than all mixed up
 
 ## Install and Usage
 
