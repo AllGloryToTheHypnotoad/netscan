@@ -21,6 +21,9 @@ good_udp_ports = ['123',  # ntp - network time protocol
 
 
 def makeRow(k,v):
+	"""
+	Build a row of the table given k (mac address) and v (host info). 
+	"""
 	row = []
 	row.append('<tr>')
 	row.append( '<td>' + v['hostname'] + '</td>' )
@@ -64,6 +67,9 @@ def makeRow(k,v):
 	return ans
 
 def sort_ip(info):
+	"""
+	Using a function in socket, sorts the IP address in order.
+	"""
 	ip = []
 	for k,v in info.items():
 		ip.append( v['ipv4'] )
@@ -74,6 +80,11 @@ def search(ip,info):
 	for k,v in info.items():
 		if ip == v['ipv4']:
 			return k,v
+	raise Exception('Error: search() should not have gotten here')
+
+def findHostName(mac,info):
+	if mac in info:
+		return info[mac]['hostname']
 	raise Exception('Error: search() should not have gotten here')
 
 def makeTable(info):
@@ -165,7 +176,17 @@ class Database :
 			v['status'] = 'down'
 			
 		for k,v in list.iteritems():
-			self.db[k]=v
+			# this is kind of sloppy, fix?
+			# is the mac address in the db? yes
+			if k in self.db:
+				hostname = self.db[k] # grab previous name just incase it went back to unknown
+				self.db[k]=v
+			
+				if hostname != 'unknown' and self.db[k]['hostname'] == 'unknown':
+					self.db[k] = hostname
+			# no - so just take whatever we have
+			else:
+				self.db[k]=v
 	
 	def diff(self,list):
 		return 0,dict()
