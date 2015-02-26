@@ -14,7 +14,8 @@ import socket # ordering
 # might use these to color code port number (green for good)
 good_tcp_ports = ['22',   # ssh
 				  '88',   # kerberos
-				  '548']  # AFP - Apple File Protocol
+				  '548',  # AFP - Apple File Protocol
+				  '5000'] # UPnP
 good_udp_ports = ['123',  # ntp - network time protocol
 				  '5353'] # bonjour/zeroconfig
 
@@ -42,8 +43,20 @@ def makeRow(k,v):
 	
 	# do a table within a table for all of the ports
 	row.append('<td><table id="porttable">')
-	for a,b in v['ports'].iteritems():
-		row.append( '<tr id="porttd"><td>' + a + '</td><td>' + b + '</td></tr>' )
+	
+	# colorize ports
+	# a - port number
+	# b - port service name and [tcp] or [udp]
+	if v['status'] == 'up':
+		for a,b in v['ports'].iteritems():
+			if (a in good_tcp_ports and b.find('[tcp]') >= 0) or (a in good_udp_ports and b.find('[udp]') >= 0):
+				row.append( '<tr id="porttd"><td style="color: rgb(0,200,0)">' + a + '</td><td style="color:rgb(0,200,0)">' + b + '</td></tr>' )
+			else:
+				row.append( '<tr id="porttd"><td>' + a + '</td><td>' + b + '</td></tr>' )
+	else: # old data is grayed out
+		for a,b in v['ports'].iteritems():
+			row.append( '<tr id="porttd"><td style="color:gray">' + a + '</td><td style="color:gray">' + b + '</td></tr>' )
+
 	
 	row.append('</table></td>')
 	row.append('</tr>')
@@ -68,7 +81,7 @@ def makeTable(info):
 	table.append('<style> table, tr, th { border: 1px solid gray; border-collapse: collapse;} th {background-color: #0066FF; color: white;} #porttable, #porttd { border: 0px;}</style>')
 	#table.append('<table style="width:100%">')
 	table.append('<table class="table table-striped">')
-	table.append('<tr> <th> Host Name </th> <th> IPv4 </th> <th> MAC addr </th> <th> Type </th> <th> Status </th> <th> Ports </th> </tr>')
+	table.append('<tr> <th> Host Name </th> <th> Status </th> <th> MAC addr </th> <th> Type </th> <th> IPv4 </th> <th> Ports </th> </tr>')
 	table.append('<p> <i class="fa fa-check-circle" style="color:green"></i> Host Up </p>')
 	table.append('<p> <i class="fa fa-times-circle" style="color:red"></i> Host Down </p>')
 	

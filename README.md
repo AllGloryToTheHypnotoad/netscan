@@ -25,11 +25,11 @@ Simple python script which uses [nmap](http://nmap.org) and [avahi](http://www.a
 
 ## To Do
 
-* Use [Bootstrap](http://getbootstrap.com) `.table-striped` class
-* Move status marker closer to name
-* Order table according to IP Address
+* [x] Use [Bootstrap](http://getbootstrap.com) `.table-striped` class
+* [x] Move status marker closer to name
+* [x] Order table according to IP Address
 * Already finger print on MAC, but always keep name if avahi comes back with unknown ... same with type
-* Color code known TCP/UDP ports and unknown/odd ports
+* [x] Color code known TCP/UDP ports and unknown/odd ports
 * Group TCP and UDP ports together rather than all mixed up
 
 ## Install and Usage
