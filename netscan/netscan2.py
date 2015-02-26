@@ -92,7 +92,7 @@ def makeTable(info):
 	table.append('<style> table, tr, th { border: 1px solid gray; border-collapse: collapse;} th {background-color: #0066FF; color: white;} #porttable, #porttd { border: 0px;}</style>')
 	#table.append('<table style="width:100%">')
 	table.append('<table class="table table-striped">')
-	table.append('<tr> <th> Host Name </th> <th> Status </th> <th> MAC addr </th> <th> Type </th> <th> IPv4 </th> <th> Ports </th> </tr>')
+	table.append('<tr> <th> Host Name </th> <th> Status </th> <th> IPv4 </th> <th> MAC addr </th> <th> Type </th>  <th> Ports </th> </tr>')
 	table.append('<p> <i class="fa fa-check-circle" style="color:green"></i> Host Up </p>')
 	table.append('<p> <i class="fa fa-times-circle" style="color:red"></i> Host Down </p>')
 	
