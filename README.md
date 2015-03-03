@@ -1,5 +1,7 @@
 # Network Scanner
 
+[![Build Status](https://travis-ci.org/walchko/netscan.svg?branch=master)](https://travis-ci.org/walchko/netscan)
+
 ![diagram](./pics/netscan.png)
 
 ![diagram](./pics/LAN-Scanner-3.jpg)
