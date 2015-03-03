@@ -31,6 +31,7 @@ Simple python script which uses [nmap](http://nmap.org) and [avahi](http://www.a
 * Already finger print on MAC, but always keep name if avahi comes back with unknown ... same with type
 * [x] Color code known TCP/UDP ports and unknown/odd ports
 * Group TCP and UDP ports together rather than all mixed up
+* Supposed to never remove MAC addresses, but I don't think that is working ... need to fix
 
 ## Install and Usage
 

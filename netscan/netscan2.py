@@ -172,10 +172,10 @@ class Database :
 	out: none
 	"""	
 	def update(self, list):
-		for k,v in self.db.iteritems():
+		for k,v in self.db.items():
 			v['status'] = 'down'
 			
-		for k,v in list.iteritems():
+		for k,v in list.items():
 			# this is kind of sloppy, fix?
 			# is the mac address in the db? yes
 			if k in self.db:
