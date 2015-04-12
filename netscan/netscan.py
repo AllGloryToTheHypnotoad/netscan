@@ -22,12 +22,12 @@ good_udp_ports = ['123',  # ntp - network time protocol
 
 def makeRow(k,v):
 	"""
-	Build a row of the table given k (mac address) and v (host info). 
+	Build a row of the table given k (mac address) and v (host info).
 	"""
 	row = []
 	row.append('<tr>')
 	row.append( '<td>' + v['hostname'] + '</td>' )
-	
+
 	# up or down
 	if v['status'] == 'up':
 		#icon = '<i class="fa fa-chevron-circle-up"></i>'
@@ -35,18 +35,18 @@ def makeRow(k,v):
 	else:
 		#icon = '<i class="fa fa-chevron-circle-down"></i>'
 		icon = '<i class="fa fa-times-circle" style="color:red"></i>'
-		
+
 	row.append( '<td>' + icon + '</td>' )
 	row.append( '<td>' + v['ipv4'] + '</td>' )
 	row.append( '<td>' + k + '</td>' )
 	row.append( '<td>' + v['type'] + '</td>' )
-	
-	
+
+
 	#row.append( '<td>' + v['status'] + '</td>' )
-	
+
 	# do a table within a table for all of the ports
 	row.append('<td><table id="porttable">')
-	
+
 	# colorize ports
 	# a - port number
 	# b - port service name and [tcp] or [udp]
@@ -60,7 +60,7 @@ def makeRow(k,v):
 		for a,b in v['ports'].iteritems():
 			row.append( '<tr id="porttd"><td style="color:gray">' + a + '</td><td style="color:gray">' + b + '</td></tr>' )
 
-	
+
 	row.append('</table></td>')
 	row.append('</tr>')
 	ans = ''.join(row)
@@ -95,16 +95,16 @@ def makeTable(info):
 	table.append('<tr> <th> Host Name </th> <th> Status </th> <th> IPv4 </th> <th> MAC addr </th> <th> Type </th>  <th> Ports </th> </tr>')
 	table.append('<p> <i class="fa fa-check-circle" style="color:green"></i> Host Up </p>')
 	table.append('<p> <i class="fa fa-times-circle" style="color:red"></i> Host Down </p>')
-	
+
 	time_now = str(datetime.datetime.now().strftime('%Y%m%d-%H:%M'))
 	table.append('<p> Info last updated: %s </p>'%time_now)
-	
+
 	table.append('<p> A list of common TCP ports is <a href="http://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers"> here </a></p>')
-	
+
 	# get sorted IP list
 	ip_sorted = sort_ip(info)
 	#print ip_sorted
-	
+
 	# k - mac address
 	# v - dict of host info
 	#for k,v in info.iteritems():
@@ -114,15 +114,15 @@ def makeTable(info):
 			k,v = search(ip,info)
 			table.append( makeRow(k,v) )
 	except:
-		print 'Error in sorting IP addresses'		
-		
+		print 'Error in sorting IP addresses'
+
 	table.append('</table>')
-	
+
 	ans = ''.join(table)
 	ans = ans.replace('(','')
 	ans = ans.replace(')','')
 	return ans
-	
+
 
 
 
@@ -139,7 +139,7 @@ def makeTable(info):
 # 	return re.sub(' +',' ',str)
 
 """
-Simple database that abstracts how I store host information. The current 
+Simple database that abstracts how I store host information. The current
 setup looks like this:
 
 58:b0:35:f2:25:d8:
@@ -155,48 +155,48 @@ Could switch to a real database, but my network is small and a flat file works f
 class Database :
 	def __init__(self):
 		self.db = dict()
-	
+
 	def load(self,filename):
 		y = YamlDoc()
 		self.db = y.read(filename)
 		if (self.db) != dict:
 			self.db = dict()
-		
+
 	def save(self,filename):
 		y = YamlDoc()
 		y.write( filename, self.db )
-	
+
 	"""
 	Given new scan results, this marks first marks all hosts down, then when updated, they are marked up.
 	in: dict of host info
 	out: none
-	"""	
+	"""
 	def update(self, list):
 		for k,v in self.db.items():
 			v['status'] = 'down'
-			
+
 		for k,v in list.items():
 			# this is kind of sloppy, fix?
 			# is the mac address in the db? yes
 			if k in self.db:
 				hostname = self.db[k] # grab previous name just incase it went back to unknown
 				self.db[k]=v
-			
+
 				if hostname != 'unknown' and self.db[k]['hostname'] == 'unknown':
 					self.db[k] = hostname
 			# no - so just take whatever we have
 			else:
 				self.db[k]=v
-	
+
 	def diff(self,list):
 		return 0,dict()
-		
+
 	def hw_addr(self):
 		ans = list()
 		for k in self.db:
 			ans.append(k)
 		return ans
-		
+
 	def getDict(self):
 		out = self.db
 		return out
@@ -208,7 +208,7 @@ in: message
 out: None
 """
 def notify(items):
-	return 0	
+	return 0
 
 def make_webpage(info,HTML_FILE):
 	table = makeTable(info)
@@ -222,9 +222,9 @@ def handleArgs():
 	parser.add_argument('-n', '--network', help='network to scan: 10.1.1.0/24 or 10.1.1.1-10', default='192.168.1.0/24')
 	parser.add_argument('-y', '--yaml', help='yaml file to store network in', default='./network.yaml')
 	parser.add_argument('-s', '--sleep', help='how long to sleep between scans', default=3600)
-	
+
 	args = vars(parser.parse_args())
-	
+
 	return args
 
 def main():
@@ -233,36 +233,35 @@ def main():
 	NETWORK = str(args['network'])
 	SLEEP = int(args['sleep'])
 	WEBPAGE = args['page']
-	
+
 	db = Database()
 	db.load(YAML_FILE)
-	
+
 	scan = ns.NetworkScan()
-	
+
 	while 1:
 		# wake things up
 		hw_addr = db.hw_addr()
 		for mac in hw_addr:
 			scan.wol(mac)
-		
+
 		print '*'*10,'Start scan on',NETWORK,'*'*10
 		list = scan.scanNetwork(NETWORK)
 		#pp.pprint(list)
-		
+
 		#ans,new_items = db.diff(list)
 		db.update(list)
-		
+
 		#if ans == true:
 		#	notify(new_items)
-		
+
 		print '>> Save:',YAML_FILE,'<<'
 		db.save(YAML_FILE)
-		
+
 		print '>> Write:',WEBPAGE,'<<'
 		make_webpage( db.getDict(), WEBPAGE )
-		
+
 		time.sleep(SLEEP)
 
 if __name__ == '__main__':
     main()
-

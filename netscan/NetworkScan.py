@@ -10,6 +10,8 @@ import pprint as pp
 import datetime
 from awake import wol
 import subprocess
+import requests as rqst
+import time
 
 # determine OS
 from sys import platform as _platform
@@ -18,30 +20,30 @@ from sys import platform as _platform
 Format:
 
 {'xx:xx:xx:xx:xx:xx': {'hostname': 'unknown',
-                       'ipv4': '192.168.12.x',
-                       'lastseen': '20150208-21:06',
-                       'ports': {53: '[tcp]domain',
-                                 137: '[udp]netbios-ns',
-                                 139: '[tcp]netbios-ssn',
-                                 445: '[tcp]microsoft-ds',
-                                 548: '[tcp]afp',
-                                 5009: '[tcp]airport-admin',
-                                 5353: '[udp]zeroconf',
-                                 10000: '[tcp]snet-sensor-mgmt'},
-                       'status': 'up',
-                       'type': 'Apple'},
+					   'ipv4': '192.168.12.x',
+					   'lastseen': '20150208-21:06',
+					   'ports': {53: '[tcp]domain',
+								 137: '[udp]netbios-ns',
+								 139: '[tcp]netbios-ssn',
+								 445: '[tcp]microsoft-ds',
+								 548: '[tcp]afp',
+								 5009: '[tcp]airport-admin',
+								 5353: '[udp]zeroconf',
+								 10000: '[tcp]snet-sensor-mgmt'},
+					   'status': 'up',
+					   'type': 'Apple'},
  'xx:xx:xx:xx:xx:xx': {'hostname': 'unknown',
-                       'ipv4': '192.168.12.x',
-                       'lastseen': '20150208-21:06',
-                       'ports': {5000: '[tcp]upnp', 5353: '[udp]zeroconf'},
-                       'status': 'up',
-                       'type': 'Apple'},
+					   'ipv4': '192.168.12.x',
+					   'lastseen': '20150208-21:06',
+					   'ports': {5000: '[tcp]upnp', 5353: '[udp]zeroconf'},
+					   'status': 'up',
+					   'type': 'Apple'},
  'xx:xx:xx:xx:xx:xx': {'hostname': 'unknown',
-                       'ipv4': '192.168.12.x',
-                       'lastseen': '20150208-21:06',
-                       'ports': {5000: '[tcp]upnp', 5353: '[udp]zeroconf'},
-                       'status': 'up',
-                       'type': 'Apple'}}
+					   'ipv4': '192.168.12.x',
+					   'lastseen': '20150208-21:06',
+					   'ports': {5000: '[tcp]upnp', 5353: '[udp]zeroconf'},
+					   'status': 'up',
+					   'type': 'Apple'}}
 """
 
 # get local host info
@@ -53,15 +55,15 @@ class IP:
 	"""Gets the IP and MAC addresses for the localhost"""
 	ip = 'x'
 	mac = 'x'
-	
+
 	def __init__(self):
 		"""Everything is done in init(), don't call any methods, just access ip or mac."""
 		self.mac = self.getHostMAC()
 		self.ip = self.getHostIP()
-		
+
 	def getHostIP(self):
 		"""
-		Need to get the localhost IP address 
+		Need to get the localhost IP address
 		in: none
 		out: returns the host machine's IP address
 		"""
@@ -76,14 +78,14 @@ class IP:
 		in: none
 		out: string of hex for MAC address 'aa:bb:11:22..'
 		"""
-		return  ':'.join(re.findall('..', '%012x' % uuid.getnode()))
+		return	':'.join(re.findall('..', '%012x' % uuid.getnode()))
 
 
 class NetworkScan:
 	"""NetworkScan utilizes Nmap to detect hosts on network and then scan their ports."""
 	def __init__(self):
 		self.this_host = IP()
-		
+
 	def nmap_cmd(self,tgt,cmd):
 		"""hello"""
 		nmap_proc = NmapProcess(targets=tgt,options=cmd)
@@ -91,11 +93,11 @@ class NetworkScan:
 		xml_msg = nmap_proc.stdout
 		nmap_report = NmapParser.parse(xml_msg)
 		return nmap_report
-		
+
 	def getHostName(self,ip):
 		"""Use the avahi (zeroconfig) tools to find a host name ... this only works
 		on Linux using the avahi tools.
-	
+
 		in: ip
 		out: string w/ host name
 		"""
@@ -107,38 +109,48 @@ class NetworkScan:
 			name = name.rstrip()
 			if name == '': name = 'unknown'
 		return name
-		
+
 	def ping(self,tgts):
 		"""Determine what hosts are on a network.
 		in: tgts - any nmap ip address or range: 1.1.1.1/24 or 1.1.1.1-25
-		out: list of ip address that responded to the ping 
-		
-		nmap: 
+		out: list of ip address that responded to the ping
+
+		nmap:
 			-sn disable port check
 			-P use specific ports to determine if a host is awake or not
-			
+
 		Common ports open on my Apple computers for things
-		PORT     STATE         SERVICE
-		22/tcp   open          ssh
-		88/tcp   open          kerberos-sec
-		548/tcp  open          afp
-		88/udp   open|filtered kerberos-sec
-		123/udp  open          ntp
-		137/udp  open|filtered netbios-ns
-		138/udp  open|filtered netbios-dgm
+		PORT	 STATE		   SERVICE
+		22/tcp	 open		   ssh
+		88/tcp	 open		   kerberos-sec
+		548/tcp	 open		   afp
+		88/udp	 open|filtered kerberos-sec
+		123/udp	 open		   ntp
+		137/udp	 open|filtered netbios-ns
+		138/udp	 open|filtered netbios-dgm
 		5353/udp open|filtered zeroconf
 		"""
 		nmap_report = self.nmap_cmd(tgts,"-sn -PS22,80,88,123,443,548,5009,5353")
 		hosts = nmap_report.hosts
-		
+
 		up = []
 		for host in hosts:
 			if host.is_up():
 				up.append(host.id)
 		return up
-	
 
-	def portScan(self,ip):	
+	def getVendor(self,mac):
+		http = 'http://www.macvendorlookup.com/api/v2/'
+		try:
+			js = rqst.put(http + mac).json()[0]
+			vendor = js['company']
+		except:
+			vendor = ''
+			print js.json()
+			print 'Error vendor REST API',mac
+		return vendor
+
+	def portScan(self,ip):
 		"""Scan ports on a specific IP address.
 		Options:
 		   -sS TCP sync check
@@ -154,12 +166,31 @@ class NetworkScan:
 				#print serv.port,serv.protocol,serv.service
 				if serv.open(): p[ str(serv.port) ] = '[' + serv.protocol + ']' + serv.service
 			
+			mac = host.mac
+			if not mac:
+				if self.this_host.ip == ip:
+					mac = self.this_host.mac
+					print ip,mac
+				else:
+					return '',{}
+			
+			vendor = ''
+			for i in range(10):
+				vendor = self.getVendor(mac)
+				if vendor: break
+				print 'loop',vendor,mac
+				time.sleep(0.5)
+				
+			#if not vendor: vendor = host.vendor
+
+			print 'vendor:',vendor,'mac',mac,'ip',ip
+
 			val = {'ipv4': ip, 'hostname': 'unknown', 'ports': p, 'status': 'up', 'type': host.vendor}
-			key = host.mac.upper() # make letters upper case
-		
+			key = mac.upper() # make letters upper case
+
 		return key,val
-	
-	
+
+
 	def scanNetwork(self,net):
 		"""
 		Main network scanner function.
@@ -167,7 +198,7 @@ class NetworkScan:
 		 2. scan those for open ports & HW addr
 		 3. get host name (only on linux)
 		 4. return dict of hosts,name,id,ip
-	
+
 		in: network ip range, ex.: 192.168.1.0/24
 		out: dict with info for each system found
 		"""
@@ -180,25 +211,22 @@ class NetworkScan:
 			#print '[+] scanning ip:',ip
 			name = self.getHostName(ip)
 			mac,info = self.portScan(ip)
-			
+
 			# try again
 			if not mac:
-				if self.this_host.ip == ip:
-					mac = self.this_host.mac
-				else: 
-					print 'try',ip,'again'
-					mac,info = self.portScan(ip)
-			
-			if mac == '':
+				print 'try',ip,'again'
+				mac,info = self.portScan(ip)
+
+			if not mac:
 				print 'Error:',ip
 			else:
 				info['lastseen'] = time_now
 				info['hostname'] = name
 				hosts[mac] = info
-		
+
 		return hosts
-		
-	
+
+
 	def wol(self, mac):
 		"""
 		Wake-on-lan (wol)
@@ -215,4 +243,3 @@ def main():
 
 if __name__ == '__main__':
 	main()
-
