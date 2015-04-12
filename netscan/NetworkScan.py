@@ -12,6 +12,7 @@ from awake import wol
 import subprocess
 import requests as rqst
 import time
+import os
 
 # determine OS
 from sys import platform as _platform
@@ -146,7 +147,6 @@ class NetworkScan:
 			vendor = js['company']
 		except:
 			vendor = ''
-			print js.json()
 			print 'Error vendor REST API',mac
 		return vendor
 
@@ -172,17 +172,15 @@ class NetworkScan:
 					mac = self.this_host.mac
 					print ip,mac
 				else:
-					return '',{}
+					return '',{'ipv4': ip, 'ports': p}
 			
 			vendor = ''
 			for i in range(10):
 				vendor = self.getVendor(mac)
 				if vendor: break
-				print 'loop',vendor,mac
+				#print 'loop',vendor,mac
 				time.sleep(0.5)
 				
-			#if not vendor: vendor = host.vendor
-
 			print 'vendor:',vendor,'mac',mac,'ip',ip
 
 			val = {'ipv4': ip, 'hostname': 'unknown', 'ports': p, 'status': 'up', 'type': host.vendor}
@@ -202,6 +200,9 @@ class NetworkScan:
 		in: network ip range, ex.: 192.168.1.0/24
 		out: dict with info for each system found
 		"""
+		if os.geteuid() != 0:
+			exit('You need to be root or use sudo')
+		
 		up = self.ping(net)
 		pp.pprint(up)
 		hosts = dict()
@@ -218,7 +219,11 @@ class NetworkScan:
 				mac,info = self.portScan(ip)
 
 			if not mac:
-				print 'Error:',ip
+				print '-'*10
+				print 'Dumping info, no MAC addr'
+				for i in info:
+					print i,info[i]
+				print '-'*10
 			else:
 				info['lastseen'] = time_now
 				info['hostname'] = name

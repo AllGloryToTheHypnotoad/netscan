@@ -14,10 +14,10 @@ class YamlDoc:
 			f = open(filename,'r')
 			file = yaml.safe_load(f)
 			f.close()
+			return file
 		except IOError:
 			file = dict()
 			print '[-] YamlDoc: IOError'
-		return file
 		
 	def write(self,filename,data):
 		"""Writes a Yaml file"""

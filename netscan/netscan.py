@@ -157,9 +157,11 @@ class Database :
 		self.db = dict()
 
 	def load(self,filename):
+		#print 'Reading:',filename
 		y = YamlDoc()
 		self.db = y.read(filename)
-		if (self.db) != dict:
+		if type(self.db) != dict:
+			print 'Reset DB'
 			self.db = dict()
 
 	def save(self,filename):
@@ -172,18 +174,25 @@ class Database :
 	out: none
 	"""
 	def update(self, list):
-		for k,v in self.db.items():
-			v['status'] = 'down'
+		for k in self.db:
+			self.db[k]['status'] = 'down'
 
 		for k,v in list.items():
 			# this is kind of sloppy, fix?
 			# is the mac address in the db? yes
 			if k in self.db:
-				hostname = self.db[k] # grab previous name just incase it went back to unknown
+				old_v = self.db[k] # grab previous name just incase it went back to unknown
 				self.db[k]=v
-
+				
+				# hostname can change or sometimes can't find it. Always take a good current one
+				hostname = old_v['hostname']
 				if hostname != 'unknown' and self.db[k]['hostname'] == 'unknown':
-					self.db[k] = hostname
+					self.db[k]['hostname'] = hostname
+				
+				# type shouldn't change, so if we find it once, use it
+				type = old_v['type']
+				if type:
+					self.db[k]['type'] = type
 			# no - so just take whatever we have
 			else:
 				self.db[k]=v

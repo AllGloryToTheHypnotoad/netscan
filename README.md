@@ -15,9 +15,7 @@ Simple python script which uses [nmap](http://nmap.org) and [avahi](http://www.a
 3. [todo] Notify admin of new hosts on network
 4. Store record of hosts in YAML file
 5. Creates a webpage for the server to display
-6. SMS admin when host appears (maybe ports too)
-7. Make last update date a little more friendly to read
-8. Add next update due 
+6. [todo] SMS admin when host appears (maybe ports too)
 
 **Note:** Since IP addresses change, the hosts are finger printed via their MAC address. The system updates open port, host name, ip address, etc, but once a MAC address is detected, it never deletes it, just updates it. However, their commandline tool for RPi I have noticed errors in the MAC address and therefor don't trust it for this application.
 
@@ -30,18 +28,12 @@ Simple python script which uses [nmap](http://nmap.org) and [avahi](http://www.a
 * [x] Use [Bootstrap](http://getbootstrap.com) `.table-striped` class
 * [x] Move status marker closer to name
 * [x] Order table according to IP Address
-* Already finger print on MAC, but always keep name if avahi comes back with unknown ... same with type
+* [x] Already finger print on MAC, but always keep name if avahi comes back with unknown ... same with type
 * [x] Color code known TCP/UDP ports and unknown/odd ports
-* Group TCP and UDP ports together rather than all mixed up
-* Supposed to never remove MAC addresses, but I don't think that is working ... need to fix
+* [ ] Group TCP and UDP ports together rather than all mixed up
+* [x] Supposed to never remove MAC addresses, but I don't think that is working ... need to fix
 
 ## Install and Usage
-
-### Install from Git
-
-	sudo pip install git+https://github.com/walchko/netscan#egg=netscan
-
-### Install from Package
 
 Download and unzip, then from inside the package:
 
@@ -116,7 +108,7 @@ Install:
 	OSX: brew install nmap
 	Linux: sudo apt-get install nmap
 
-	sudo pip install twilio wol PyYAML python-libnmap
+	sudo pip install twilio wol PyYAML python-libnmap requests
 
 Nmap needs to be run as root, using sudo, to do it's job properly.
 
@@ -136,8 +128,6 @@ Nmap host scan:
 * `F`  tells nmap to do this fast and not wait as long as it could for returns 
 
 A full listing of known ports are available on [wikipedia](http://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers)
-
-**Note:** Both `nmap` commands get pipped through grep, awk, and/or sed to clean the output up for python.
 
 ## Data Base
 
