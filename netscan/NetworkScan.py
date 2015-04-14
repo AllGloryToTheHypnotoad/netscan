@@ -183,7 +183,7 @@ class NetworkScan:
 				
 			print 'vendor:',vendor,'mac',mac,'ip',ip
 
-			val = {'ipv4': ip, 'hostname': 'unknown', 'ports': p, 'status': 'up', 'type': host.vendor}
+			val = {'ipv4': ip, 'hostname': 'unknown', 'ports': p, 'status': 'up', 'type': vendor}
 			key = mac.upper() # make letters upper case
 
 		return key,val

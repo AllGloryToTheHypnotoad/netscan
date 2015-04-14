@@ -51,7 +51,9 @@ To see all run time options:
 
 Basic, to search for addresses ending in 25 to 70 on your network, use:
 
-	sudo python -m netscan.netscan2 -n 192.168.10.25-70
+	sudo netscan -n 192.168.10.25-70
+
+**Note:** This has to be run as root
 
 ### Init.d
 

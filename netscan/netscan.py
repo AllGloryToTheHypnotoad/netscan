@@ -53,7 +53,7 @@ def makeRow(k,v):
 	if v['status'] == 'up':
 		for a,b in v['ports'].iteritems():
 			if (a in good_tcp_ports and b.find('[tcp]') >= 0) or (a in good_udp_ports and b.find('[udp]') >= 0):
-				row.append( '<tr id="porttd"><td style="color: rgb(0,200,0)">' + a + '</td><td style="color:rgb(0,200,0)">' + b + '</td></tr>' )
+				row.append( '<tr id="porttd"><td style="color:limegreen">' + a + '</td><td style="color:limegreen">' + b + '</td></tr>' )
 			else:
 				row.append( '<tr id="porttd"><td>' + a + '</td><td>' + b + '</td></tr>' )
 	else: # old data is grayed out
