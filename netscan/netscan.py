@@ -85,7 +85,7 @@ def search(ip,info):
 def findHostName(mac,info):
 	if mac in info:
 		return info[mac]['hostname']
-	raise Exception('Error: search() should not have gotten here')
+	raise Exception('Error: findHostName() should not have gotten here')
 
 def makeTable(info):
 	table = ['<h1> LAN Host Map </h1>']

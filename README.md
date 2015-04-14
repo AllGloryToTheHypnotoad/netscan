@@ -17,7 +17,7 @@ Simple python script which uses [nmap](http://nmap.org) and [avahi](http://www.a
 5. Creates a webpage for the server to display
 6. [todo] SMS admin when host appears (maybe ports too)
 
-**Note:** Since IP addresses change, the hosts are finger printed via their MAC address. The system updates open port, host name, ip address, etc, but once a MAC address is detected, it never deletes it, just updates it. However, their commandline tool for RPi I have noticed errors in the MAC address and therefor don't trust it for this application.
+**Note:** Since IP addresses change, the hosts are finger printed via their MAC address. The system updates open port, host name, ip address, etc, but once a MAC address is detected, it never deletes it, just updates it. However, the `fing` commandline tool for RPi I have noticed errors in the MAC address and therefor don't trust it for this application.
 
 ## Alternatives
 
