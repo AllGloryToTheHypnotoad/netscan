@@ -13,6 +13,7 @@ import subprocess
 import requests as rqst
 import time
 import os
+import commands
 
 # determine OS
 from sys import platform as _platform
@@ -49,7 +50,7 @@ Format:
 
 # get local host info
 import re
-import uuid
+#import uuid
 import socket
 
 class IP:
@@ -73,14 +74,21 @@ class IP:
 		ip = socket.gethostbyname(host_name)
 		return ip
 
-	def getHostMAC(self):
+	def getHostMAC(self,dev='en1'):
 		"""
 		Major flaw of NMAP doesn't allow you to get the localhost's MAC address, so this is a work around.
 		in: none
-		out: string of hex for MAC address 'aa:bb:11:22..'
+		out: string of hex for MAC address 'aa:bb:11:22..' or empty string if error
 		"""
-		return	':'.join(re.findall('..', '%012x' % uuid.getnode()))
-
+		# this doesn't work, could return any network address (en0, en1, bluetooth, etc)
+		#return	':'.join(re.findall('..', '%012x' % uuid.getnode()))
+		mac = commands.getoutput("ifconfig " + dev + "| grep ether | awk '{ print $2 }'")
+		
+		# double check it is a valid mac address
+		if len(mac) == 17 and len(mac.split(':')) == 6: return mac
+		
+		# nothing found
+		return ''
 
 class NetworkScan:
 	"""NetworkScan utilizes Nmap to detect hosts on network and then scan their ports."""
@@ -94,7 +102,26 @@ class NetworkScan:
 		xml_msg = nmap_proc.stdout
 		nmap_report = NmapParser.parse(xml_msg)
 		return nmap_report
-
+	
+	def getRemoteHWAddr(self,dev,ip):
+		"""
+		Sends an arp command to an ip address (also could be a hostname) on a network 
+		interface (i.e., 'en1', 'eth1') and returns the mac address. There is a double
+		check that the result is a mac address, if not, then an empty string is returned.
+		"""
+		ans = commands.getoutput('arp -i %s %s'%(dev,ip))
+		mac = ans.split()[3]
+		if len(mac) == 17 and len(mac.split(':')) == 6:
+			return mac
+		
+		# didn't get a mac address, so need to search the string
+		for m in ans.split():
+			if len(m) == 17 and len(m.split(':')) == 6:
+				return m
+		
+		# nothing of value found, host maybe down
+		return ''
+		
 	def getHostName(self,ip):
 		"""Use the avahi (zeroconfig) tools to find a host name ... this only works
 		on Linux using the avahi tools.
